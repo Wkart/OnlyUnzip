@@ -286,12 +286,22 @@ def process_7zip_x(_7zip_path: str, file: str, password: str, cover_model: str, 
     elif return_code == 255:
         return Result7zip.UserStopped()
     else:  # 兜底
+        if error_type:
+            return error_type
         return Result7zip.UnknownError('未知错误')
 
 
-def get_temp_dirpath(dirpath: str):
-    """获取根据传入路径计算的临时文件夹路径"""
-    return os.path.normpath(os.path.join(dirpath, TEMP_EXTRACT_FOLDER))
+def get_temp_dirpath(dirpath: str, file_path: str = None):
+    """获取根据传入路径计算的临时文件夹路径
+    :param dirpath: 输出目录
+    :param file_path: 压缩包文件路径（可选，提供则以压缩包文件名命名临时文件夹）
+    """
+    if file_path:
+        # 使用压缩包文件名（不含扩展名）+ UnzipTempFolder 作为临时文件夹名
+        folder_name = os.path.splitext(os.path.basename(file_path))[0] + "UnzipTempFolder"
+    else:
+        folder_name = TEMP_EXTRACT_FOLDER
+    return os.path.normpath(os.path.join(dirpath, folder_name))
 
 
 def progress_7zip_x_with_temp_folder(_7zip_path: str, file: str, password: str, cover_model: str, output_folder: str,
@@ -304,7 +314,7 @@ def progress_7zip_x_with_temp_folder(_7zip_path: str, file: str, password: str, 
     :param output_folder: 解压输出目录
     :param filter_rule: 文件过滤器规则
     :return: 7zip结果类"""
-    extract_dirpath_temp = get_temp_dirpath(output_folder)
+    extract_dirpath_temp = get_temp_dirpath(output_folder, file)
     return process_7zip_x(_7zip_path, file, password, cover_model, extract_dirpath_temp, filter_rule)
 
 
