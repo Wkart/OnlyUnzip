@@ -1,5 +1,5 @@
-# 设置模块的界面组件
-# 仅用于显示，不执行具体方法
+# ?????????
+# ?????,???????
 import os
 import sys
 
@@ -13,46 +13,50 @@ from components.page_setting.res.ui_page_setting import Ui_Form
 
 
 class SettingViewer(QWidget):
-    """设置模块的界面组件"""
-    ChangeArchiveModelTest = Signal(bool, name="修改为测试模式")
-    ChangeArchiveModelExtract = Signal(bool, name="修改为解压模式")
-    ChangePreFilterModeDefault = Signal(bool, name="修改文件预筛选模式为默认模式")
-    ChangePreFilterModeBlackList = Signal(bool, name="修改文件预筛选模式为黑名单模式")
-    ChangePreFilterModeBlackListRule = Signal(list, name="修改文件预筛选模式的黑名单规则")
-    ChangePreFilterModeWhiteList = Signal(bool, name="修改文件预筛选模式为白名单模式")
-    ChangePreFilterModeWhiteListRule = Signal(list, name="修改文件预筛选模式的白名单规则")
-    ChangeTryUnknownFiletype = Signal(bool, name="修改处理未知格式的文件")
-    ChangeReadPasswordFromFilename = Signal(bool, name="修改从文件名中读取密码")
-    ChangeWriteFilename = Signal(bool, name="修改写入文件名")
-    ChangeWriteFilenameLeftPart = Signal(str, name="修改密码格式左边部分")
-    ChangeWriteFilenameRightPart = Signal(str, name="修改密码格式右边部分")
-    ChangeWriteFilenamePosition = Signal(str, name="修改密码格式位置")
-    ChangeExtractModelSmart = Signal(bool, name="修改智能解压模式")
-    ChangeExtractModelDirect = Signal(bool, name="修改直接解压模式")
-    ChangeExtractModelSameFolder = Signal(bool, name="修改同名目录解压模式")
-    ChangeDeleteFile = Signal(bool, name="修改解压后删除原文件")
-    ChangeRecursiveExtract = Signal(bool, name="修改递归解压")
-    ChangeCoverModel = Signal(str, name="修改覆盖模式")
-    ChangeBreakFolder = Signal(bool, name="修改解散文件夹")
-    ChangeBreakFolderModel = Signal(str, name="修改解散文件夹模式")
-    ChangeExtractOutputFolder = Signal(bool, name="修改是否解压至指定目录")
-    ChangeExtractOutputFolderPath = Signal(str, name="修改解压输出目录")
-    ChangeExtractFilter = Signal(bool, name="修改解压文件过滤器")
-    ChangeExtractFilterRule = Signal(str, name="修改解压文件过滤器规则")
-    Change7ZipPath = Signal(str, name="修改7zip路径")
-    ChangeTopWindow = Signal(bool, name="修改窗口置顶")
-    ChangeLockSize = Signal(bool, name="修改锁定窗口大小")
+    """?????????"""
+    ChangeArchiveModelTest = Signal(bool, name="???????")
+    ChangeArchiveModelExtract = Signal(bool, name="???????")
+    ChangePreFilterModeDefault = Signal(bool, name="??????????????")
+    ChangePreFilterModeBlackList = Signal(bool, name="???????????????")
+    ChangePreFilterModeBlackListRule = Signal(list, name="???????????????")
+    ChangePreFilterModeWhiteList = Signal(bool, name="???????????????")
+    ChangePreFilterModeWhiteListRule = Signal(list, name="???????????????")
+    ChangeTryUnknownFiletype = Signal(bool, name="???????????")
+    ChangeReadPasswordFromFilename = Signal(bool, name="???????????")
+    ChangeWriteFilename = Signal(bool, name="???????")
+    ChangeWriteFilenameLeftPart = Signal(str, name="??????????")
+    ChangeWriteFilenameRightPart = Signal(str, name="??????????")
+    ChangeWriteFilenamePosition = Signal(str, name="????????")
+    ChangeExtractModelSmart = Signal(bool, name="????????")
+    ChangeExtractModelDirect = Signal(bool, name="????????")
+    ChangeExtractModelSameFolder = Signal(bool, name="??????????")
+    ChangeDeleteFile = Signal(bool, name="??????????")
+    ChangeDeleteMode = Signal(str, name="??????")
+    ChangeRecursiveExtract = Signal(bool, name="??????")
+    ChangeWebpToJpg = Signal(bool, name="??webp?jpg")
+    ChangeWebpDeleteSource = Signal(bool, name="??webp?????")
+    ClickAdjustAreaOrder = Signal(name="????????")
+    ChangeCoverModel = Signal(str, name="??????")
+    ChangeBreakFolder = Signal(bool, name="???????")
+    ChangeBreakFolderModel = Signal(str, name="?????????")
+    ChangeExtractOutputFolder = Signal(bool, name="???????????")
+    ChangeExtractOutputFolderPath = Signal(str, name="????????")
+    ChangeExtractFilter = Signal(bool, name="?????????")
+    ChangeExtractFilterRule = Signal(str, name="???????????")
+    Change7ZipPath = Signal(str, name="??7zip??")
+    ChangeTopWindow = Signal(bool, name="??????")
+    ChangeLockSize = Signal(bool, name="????????")
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = Ui_Form()
         self.ui.setupUi(self)
 
-        # 初始化
+        # ???
         self._bind_signal()
         self._set_icon()
 
-        # 更新延时器
+        # ?????
         self._timer_black_list_rule = QTimer()
         self._timer_black_list_rule.setInterval(1000)
         self._timer_black_list_rule.setSingleShot(True)
@@ -63,37 +67,37 @@ class SettingViewer(QWidget):
         self._timer_white_list_rule.setSingleShot(True)
         self._timer_white_list_rule.timeout.connect(self._emit_white_list_rule)
 
-        # 为ComboBox安装事件过滤器，屏蔽其滚轮事件
+        # ?ComboBox???????,???????
         self.ui.comboBox_break_folder.installEventFilter(self)
         self.ui.comboBox_pw_position.installEventFilter(self)
         self.ui.comboBox_cover_file.installEventFilter(self)
 
     def lock(self):
-        """锁定全部设置项，禁止修改"""
+        """???????,????"""
         self._set_enable(False)
 
     def unlock(self):
-        """解锁全部设置项，允许修改"""
+        """???????,????"""
         self._set_enable(True)
 
     def _choose_dirpath(self):
-        """打开对话框，选择指定解压目录"""
-        dirpath = QFileDialog.getExistingDirectory(self, "指定解压输出目录")
+        """?????,????????"""
+        dirpath = QFileDialog.getExistingDirectory(self, "????????")
         if dirpath:
             self.ui.lineEdit_extract_output_folder.setText(dirpath)
 
     def _choose_7zip_path(self):
-        """打开对话框，选择指定的7zip路径"""
-        path, _ = QFileDialog.getOpenFileName(self, "选择7Zip路径", filter="7z.exe (7z.exe)")
+        """?????,?????7zip??"""
+        path, _ = QFileDialog.getOpenFileName(self, "??7Zip??", filter="7z.exe (7z.exe)")
         if path:
             path = os.path.normpath(path)
             if os.path.basename(path) == '7z.exe':
-                # 如果7zip文件在程序目录下，则转换为相对路径
-                # 程序目录
+                # ??7zip????????,????????
+                # ????
                 app_path = sys.argv[0]
                 app_parent = os.path.dirname(app_path)
                 app_parent = os.path.normpath(app_parent)
-                # 检查路径
+                # ????
                 if lzytools.file.is_subpath(app_parent, path):
                     relative_path = os.path.relpath(path, app_parent)
                     relative_path_full = os.path.join('.\\', relative_path)
@@ -103,7 +107,7 @@ class SettingViewer(QWidget):
                     self.ui.lineEdit_7zip_path.setText(path)
 
     def _open_dirpath(self):
-        """打开指定的解压目录"""
+        """?????????"""
         dirpath = self.ui.lineEdit_extract_output_folder.text()
         if dirpath:
             os.startfile(dirpath)
@@ -129,197 +133,212 @@ class SettingViewer(QWidget):
         self.ui.widget_test.setEnabled(is_enable)
         self.ui.widget_extract.setEnabled(is_enable)
 
-    """以下为设置选项的方法"""
+    """??????????"""
 
     def set_setting_model_extract(self):
-        """设置压缩包处理模式：解压模式"""
+        """?????????:????"""
         self.ui.radioButton_mode1_extract.setChecked(True)
         self.ui.radioButton_mode1_test.setChecked(False)
-        # 隐藏/显示相应的设置项
+        # ??/????????
         self._show_settings_extract()
-        # 手动发送一次信号
+        # ????????
         self.ChangeArchiveModelExtract.emit(True)
 
     def set_setting_model_test(self):
-        """设置压缩包处理模式：测试模式"""
+        """?????????:????"""
         self.ui.radioButton_mode1_extract.setChecked(False)
         self.ui.radioButton_mode1_test.setChecked(True)
-        # 隐藏/显示相应的设置项
+        # ??/????????
         self._show_settings_test()
-        # 手动发送一次信号
+        # ????????
         self.ChangeArchiveModelTest.emit(True)
 
     def set_setting_pre_filter_mode_default(self):
-        """设置文件预筛选模式：默认模式"""
+        """?????????:????"""
         self.ui.radioButton_pre_filter_mode_default.setChecked(True)
         self.ui.radioButton_pre_filter_mode_black_list.setChecked(False)
         self.ui.radioButton_pre_filter_mode_white_list.setChecked(False)
 
     def set_setting_pre_filter_mode_black_list(self):
-        """设置文件预筛选模式：黑名单模式"""
+        """?????????:?????"""
         self.ui.radioButton_pre_filter_mode_black_list.setChecked(True)
         self.ui.radioButton_pre_filter_mode_default.setChecked(False)
         self.ui.radioButton_pre_filter_mode_white_list.setChecked(False)
 
     def set_setting_pre_filter_mode_black_list_rule(self, rules: list[str]):
-        """设置文件预筛选模式：黑名单模式规则"""
+        """?????????:???????"""
         self.ui.textEdit_black_list.clear()
         for rule in rules:
             if rule:
                 self.ui.textEdit_black_list.append(rule)
 
     def set_setting_pre_filter_mode_white_list(self):
-        """设置文件预筛选模式：白名单模式"""
+        """?????????:?????"""
         self.ui.radioButton_pre_filter_mode_white_list.setChecked(True)
         self.ui.radioButton_pre_filter_mode_default.setChecked(False)
         self.ui.radioButton_pre_filter_mode_black_list.setChecked(False)
 
     def set_setting_pre_filter_mode_white_list_rule(self, rules: list[str]):
-        """设置文件预筛选模式：白名单模式规则"""
+        """?????????:???????"""
         self.ui.textEdit_white_list.clear()
         for rule in rules:
             if rule:
                 self.ui.textEdit_white_list.append(rule)
 
     def _show_settings_extract(self):
-        """显示解压模式的设置项，隐藏测试模式的设置项"""
+        """??????????,??????????"""
         self.ui.widget_extract.setVisible(True)
         self.ui.widget_test.setVisible(False)
 
     def _show_settings_test(self):
-        """显示测试模式的设置项，隐藏解压模式的设置项"""
+        """??????????,??????????"""
         self.ui.widget_extract.setVisible(False)
         self.ui.widget_test.setVisible(True)
 
     def set_setting_is_try_unknown_filetype(self, is_enable: bool):
-        """通用选项
-        设置是否尝试处理未知格式的文件"""
+        """????
+        ???????????????"""
         self.ui.checkBox_try_unknown_filetype.setChecked(is_enable)
 
     def set_setting_is_read_password_from_filename(self, is_enable: bool):
-        """通用选项
-        设置是否尝试从文件名中读取密码"""
+        """????
+        ???????????????"""
         self.ui.checkBox_read_password_from_filename.setChecked(is_enable)
 
     def set_setting_write_filename(self, is_enable: bool):
-        """测试模式选项
-        设置检索到正确密码后是否将其写入文件名"""
+        """??????
+        ???????????????????"""
         self.ui.checkBox_write_filename.setChecked(is_enable)
 
     def set_setting_write_filename_left_part(self, text: str):
-        """测试模式选项
-        将密码写入文件名时的左侧字符"""
+        """??????
+        ??????????????"""
         self.ui.lineEdit_left_word.setText(text)
 
     def set_setting_write_filename_right_part(self, text: str):
-        """测试模式选项
-        将密码写入文件名时的右侧字符"""
+        """??????
+        ??????????????"""
         self.ui.lineEdit_right_word.setText(text)
 
     def set_setting_write_filename_position(self, option: str):
-        """测试模式选项
-        将密码写入文件名时的位置
-        :param option: 对应的comboBox选项文本"""
+        """??????
+        ????????????
+        :param option: ???comboBox????"""
         self.ui.comboBox_pw_position.setCurrentText(option)
 
     def set_setting_write_filename_preview(self, preview: str):
-        """测试模式选项
-        将密码写入文件名时的文件名示例"""
+        """??????
+        ???????????????"""
         self.ui.label_preview_filename.setText(preview)
 
     def set_setting_extract_model_smart(self):
-        """解压模式选项
-        设置解压模式为智能解压（逻辑类似于BandiZip）"""
+        """??????
+        ???????????(?????BandiZip)"""
         self.ui.radioButton_mode2_smart_extract.setChecked(True)
         self.ui.radioButton_mode2_direct_extract.setChecked(False)
         self.ui.radioButton_mode2_extract_same_folder.setChecked(False)
 
     def set_setting_extract_model_direct(self):
-        """解压模式选项
-        设置解压模式为直接解压（不对结果进行处理）"""
+        """??????
+        ???????????(????????)"""
         self.ui.radioButton_mode2_smart_extract.setChecked(False)
         self.ui.radioButton_mode2_direct_extract.setChecked(True)
         self.ui.radioButton_mode2_extract_same_folder.setChecked(False)
 
     def set_setting_extract_model_same_folder(self):
-        """解压模式选项
-        设置解压模式为解压到同名目录（结果放置于新建的同名目录中）"""
+        """??????
+        ??????????????(?????????????)"""
         self.ui.radioButton_mode2_smart_extract.setChecked(False)
         self.ui.radioButton_mode2_direct_extract.setChecked(False)
         self.ui.radioButton_mode2_extract_same_folder.setChecked(True)
 
     def set_setting_delete_file(self, is_enable: bool):
-        """解压模式选项
-        设置解压后删除原文件"""
+        """??????
+        ??????????"""
         self.ui.checkBox_delete_origin.setChecked(is_enable)
 
+    def set_setting_delete_mode(self, mode: str):
+        """v2.2.1:??????(trash/direct)"""
+        if mode == 'direct':
+            self.ui.comboBox_delete_mode.setCurrentIndex(1)
+        else:
+            self.ui.comboBox_delete_mode.setCurrentIndex(0)
+
+    def set_setting_webp_to_jpg(self, is_enable: bool):
+        """v2.2.1:??webp?jpg"""
+        self.ui.checkBox_webp_to_jpg.setChecked(is_enable)
+
+    def set_setting_webp_delete_source(self, is_enable: bool):
+        """v2.2.1:??webp??????????"""
+        self.ui.checkBox_webp_delete_source.setChecked(is_enable)
+
     def set_setting_recursive_extract(self, is_enable: bool):
-        """解压模式选项
-        设置完成解压任务后是否进行递归解压（再次执行直到没有能解压的文件）"""
+        """??????
+        ?????????????????(??????????????)"""
         self.ui.checkBox_recursive_extract.setChecked(is_enable)
 
     def set_setting_cover_model(self, option: str):
-        """解压模式选项
-        设置重名文件覆盖模式
-        :param option: 对应的comboBox选项文本"""
+        """??????
+        ??????????
+        :param option: ???comboBox????"""
         self.ui.comboBox_cover_file.setCurrentText(option)
 
     def set_setting_break_folder(self, is_enable: bool):
-        """解压模式选项
-        设置完成单个解压任务后是否解散文件夹"""
+        """??????
+        ??????????????????"""
         self.ui.checkBox_break_folder.setChecked(is_enable)
 
     def set_setting_break_folder_model(self, option: str):
-        """解压模式选项
-        设置解散文件夹的模式
-        :param option: 对应的comboBox选项文本"""
+        """??????
+        ??????????
+        :param option: ???comboBox????"""
         self.ui.comboBox_break_folder.setCurrentText(option)
 
     def set_setting_extract_to_folder(self, is_enable: bool):
-        """解压模式选项
-        设置是否解压至指定目录"""
+        """??????
+        ???????????"""
         self.ui.checkBox_extract_output_folder.setChecked(is_enable)
 
     def set_setting_extract_output_folder(self, dirpath: str):
-        """测试模式选项
-        设置解压输出目录"""
+        """??????
+        ????????"""
         self.ui.lineEdit_extract_output_folder.setText(dirpath)
         self.ui.lineEdit_extract_output_folder.setToolTip(dirpath)
 
     def set_setting_filter(self, is_enable: bool):
-        """解压模式选项
-        设置解压时是否过滤文件"""
+        """??????
+        ???????????"""
         self.ui.checkBox_extract_filter.setChecked(is_enable)
 
     def set_setting_filter_rule(self, rule: str):
-        """测试模式选项
-        设置过滤文件规则"""
+        """??????
+        ????????"""
         self.ui.plainTextEdit_extract_filter_rule.setPlainText(rule)
 
     def set_setting_7zip_path(self, filepath: str):
-        """设置7zip路径"""
+        """??7zip??"""
         self.ui.lineEdit_7zip_path.setText(filepath)
 
     def set_top_window(self, is_enable: bool):
-        """设置是否置顶窗口"""
+        """????????"""
         self.ui.checkBox_top_window.setChecked(is_enable)
 
     def set_lock_size(self, is_enable: bool):
-        """设置是否锁定窗口大小"""
+        """??????????"""
         self.ui.checkBox_lock_size.setChecked(is_enable)
 
-    """以下为信号绑定的方法"""
+    """??????????"""
 
     def _bind_signal(self):
-        """绑定信号"""
-        # 弹窗
+        """????"""
+        # ??
         self.ui.toolButton_choose.clicked.connect(self._choose_dirpath)
         self.ui.toolButton_choose_7zip_path.clicked.connect(self._choose_7zip_path)
         self.ui.toolButton_open.clicked.connect(self._open_dirpath)
-        # 模式
+        # ??
         self.ui.radioButton_mode1_extract.clicked.connect(self._change_archive_model)
         self.ui.radioButton_mode1_test.clicked.connect(self._change_archive_model)
-        # 文件预筛选模式
+        # ???????
         self.ui.radioButton_pre_filter_mode_default.clicked.connect(self._change_pre_filter_model)
         self.ui.radioButton_pre_filter_mode_black_list.clicked.connect(self._change_pre_filter_model)
         self.ui.radioButton_pre_filter_mode_white_list.clicked.connect(self._change_pre_filter_model)
@@ -330,42 +349,51 @@ class SettingViewer(QWidget):
         self.ui.pushButton_return_1.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
         self.ui.pushButton_return_2.clicked.connect(lambda: self.ui.stackedWidget.setCurrentIndex(0))
 
-        # 处理未知文件
+        # ??????
         self.ui.checkBox_try_unknown_filetype.stateChanged.connect(self.ChangeTryUnknownFiletype.emit)
-        # 从文件名中读取密码
+        # ?????????
         self.ui.checkBox_read_password_from_filename.stateChanged.connect(self.ChangeReadPasswordFromFilename.emit)
-        # 密码写入文件名
+        # ???????
         self.ui.checkBox_write_filename.stateChanged.connect(self.ChangeWriteFilename.emit)
         self.ui.lineEdit_left_word.textChanged.connect(self.ChangeWriteFilenameLeftPart.emit)
         self.ui.lineEdit_right_word.textChanged.connect(self.ChangeWriteFilenameRightPart.emit)
         self.ui.comboBox_pw_position.currentTextChanged.connect(self.ChangeWriteFilenamePosition.emit)
-        # 解压模式
+        # ????
         self.ui.radioButton_mode2_smart_extract.clicked.connect(self._change_extract_model)
         self.ui.radioButton_mode2_direct_extract.clicked.connect(self._change_extract_model)
         self.ui.radioButton_mode2_extract_same_folder.clicked.connect(self._change_extract_model)
-        # 删除原文件
+        # ?????
         self.ui.checkBox_delete_origin.stateChanged.connect(self.ChangeDeleteFile.emit)
-        # 递归解压
+        # v2.2.1:????
+        self.ui.comboBox_delete_mode.currentTextChanged.connect(
+            lambda: self.ChangeDeleteMode.emit('direct' if self.ui.comboBox_delete_mode.currentIndex() == 1 else 'trash'))
+        # v2.2.1:webp?jpg
+        self.ui.checkBox_webp_to_jpg.stateChanged.connect(self.ChangeWebpToJpg.emit)
+        # v2.2.1:webp?????
+        self.ui.checkBox_webp_delete_source.stateChanged.connect(self.ChangeWebpDeleteSource.emit)
+        # ????
         self.ui.checkBox_recursive_extract.stateChanged.connect(self.ChangeRecursiveExtract.emit)
-        # 覆盖模式
+        # ????
         self.ui.comboBox_cover_file.currentTextChanged.connect(self.ChangeCoverModel.emit)
-        # 解散文件夹
+        # ?????
         self.ui.checkBox_break_folder.stateChanged.connect(self.ChangeBreakFolder.emit)
         self.ui.comboBox_break_folder.currentTextChanged.connect(
             lambda: self.ChangeBreakFolderModel.emit(self.ui.comboBox_break_folder.currentText()))
-        # 解压到指定目录
+        # ???????
         self.ui.checkBox_extract_output_folder.stateChanged.connect(self.ChangeExtractOutputFolder.emit)
         self.ui.lineEdit_extract_output_folder.textChanged.connect(self.ChangeExtractOutputFolderPath.emit)
-        # 过滤文件
+        # ????
         self.ui.checkBox_extract_filter.stateChanged.connect(self.ChangeExtractFilter.emit)
         self.ui.plainTextEdit_extract_filter_rule.textChanged.connect(
             lambda: self.ChangeExtractFilterRule.emit(self.ui.plainTextEdit_extract_filter_rule.toPlainText()))
-        # 自定义7Zip路径
+        # ???7Zip??
         self.ui.lineEdit_7zip_path.textChanged.connect(self.Change7ZipPath.emit)
-        # 置顶窗口
+        # ????
         self.ui.checkBox_top_window.stateChanged.connect(self.ChangeTopWindow.emit)
-        # 锁定窗口大小
+        # ??????
         self.ui.checkBox_lock_size.stateChanged.connect(self.ChangeLockSize.emit)
+        # v2.2.1:??????
+        self.ui.pushButton_adjust_area_order.clicked.connect(self.ClickAdjustAreaOrder.emit)
 
     def _change_archive_model(self):
         if self.ui.radioButton_mode1_extract.isChecked():
@@ -408,7 +436,7 @@ class SettingViewer(QWidget):
         self.ChangePreFilterModeWhiteListRule.emit(rules)
 
     def eventFilter(self, obj, event):
-        # 忽略ComboBox的滚轮事件
+        # ??ComboBox?????
         if obj == self.ui.comboBox_break_folder and event.type() == QEvent.Wheel:
             return True
         elif obj == self.ui.comboBox_cover_file and event.type() == QEvent.Wheel:

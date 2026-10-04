@@ -1,5 +1,5 @@
-# 设置模块的模型组件
-# 用于配置文件的具体方法，包括读取、修改、保存、获取等
+# ?????????
+# ???????????,??????????????
 import configparser
 import os
 from typing import Union
@@ -8,22 +8,22 @@ from common.class_7zip import ModelArchive, Position, ModelExtract, ModelCoverFi
     TYPES_MODEL_ARCHIVE, TYPES_MODEL_BREAK_FOLDER, TYPES_POSITION, TYPES_MODEL_COVER_FILE, TYPES_MODEL_EXTRACT, \
     TYPES_MODEL_PRE_FILTER, ModelPreFilter
 
-_CONFIG_FILE = 'setting.ini'  # 配置文件的相对路径（默认在主程序的同目录下）
-_SPLIT_WORD = '丨'
+_CONFIG_FILE = 'setting.ini'  # ?????????(???????????)
+_SPLIT_WORD = '?'
 
 
 class SettingModel:
-    """设置模块的模型组件"""
+    """?????????"""
 
     def __init__(self):
-        # 检查配置文件是否存在
+        # ??????????
         self._check_config_exists()
 
-        # 读取配置文件实例对象
+        # ??????????
         self.config = configparser.ConfigParser()
         self.config.read(_CONFIG_FILE, encoding='utf-8')
 
-        # 实例设置项子类
+        # ???????
         self._model_archive = _ChildSettingModelArchive(self.config)
         self._model_pre_filter = _ChildSettingModelPreFilter(self.config)
         self._try_unknown_filetype = _ChildSettingTryUnknownFiletype(self.config)
@@ -39,10 +39,13 @@ class SettingModel:
         self._7zip_path = _ChildSetting7ZipPath(self.config)
         self._top_window = _ChildSettingTopWindow(self.config)
         self._lock_size = _ChildSettingLockSize(self.config)
+        self._webp_to_jpg = _ChildSettingWebpToJpg(self.config)
+        self._webp_delete_source = _ChildSettingWebpDeleteSource(self.config)
+        self._area_order = _ChildSettingAreaOrder(self.config)
 
     @staticmethod
     def _check_config_exists():
-        """检查配置文件是否存在"""
+        """??????????"""
         if not os.path.exists(_CONFIG_FILE):
             with open(_CONFIG_FILE, 'w', encoding='utf-8'):
                 pass
@@ -144,10 +147,22 @@ class SettingModel:
         self.set_model_extract(ModelExtract.SameFolder())
 
     def get_delete_file_is_enable(self):
-        return self._delete_file.read()
+        return self._delete_file.read_is_enable()
 
     def set_delete_file_is_enable(self, is_enable: bool):
-        self._delete_file.set(is_enable)
+        self._delete_file.set_is_enable(is_enable)
+
+    def get_delete_file_mode(self):
+        """v2.2.1:??????"""
+        return self._delete_file.read_delete_mode()
+
+    def set_delete_file_mode(self, mode: str):
+        """v2.2.1:??????"""
+        self._delete_file.set_delete_mode(mode)
+
+    def get_delete_file_is_send_to_trash(self):
+        """v2.2.1:????????"""
+        return self._delete_file.is_send_to_trash()
 
     def get_recursive_extract_is_enable(self):
         return self._recursive_extract.read()
@@ -236,20 +251,44 @@ class SettingModel:
     def set_lock_size_width(self, width: int):
         self._lock_size.set_width(width)
 
+    def get_webp_to_jpg_is_enable(self):
+        """v2.2.1:??webp?jpg????"""
+        return self._webp_to_jpg.read()
+
+    def set_webp_to_jpg_is_enable(self, is_enable: bool):
+        """v2.2.1:??webp?jpg????"""
+        self._webp_to_jpg.set(is_enable)
+
+    def get_webp_delete_source_is_enable(self):
+        """v2.2.1:??webp??????????"""
+        return self._webp_delete_source.read()
+
+    def set_webp_delete_source_is_enable(self, is_enable: bool):
+        """v2.2.1:??webp??????????"""
+        self._webp_delete_source.set(is_enable)
+
+    def get_area_order(self):
+        """v2.2.1:????????"""
+        return self._area_order.read()
+
+    def set_area_order(self, order: str):
+        """v2.2.1:????????"""
+        self._area_order.set(order)
+
 
 class _ModuleChildSetting:
-    """抽象类：设置项"""
+    """???:???"""
 
     def __init__(self, config: configparser.ConfigParser):
-        """:param config: 配置文件的ConfigParser对象"""
+        """:param config: ?????ConfigParser??"""
         self.config = config
 
     def _read_key(self, section: str, key: str, default_value):
-        """读取对应设置项的值，如果失败则返回默认值"""
+        """?????????,??????????"""
         return self.config.get(section, key, fallback=default_value)
 
     def _set_value(self, section: str, key: str, value: str):
-        """设置设置项"""
+        """?????"""
         if section not in self.config:
             self.config.add_section(section)
         self.config.set(section, key, str(value))
@@ -257,7 +296,7 @@ class _ModuleChildSetting:
 
 
 class _ModuleChildSettingSingleEnable(_ModuleChildSetting):
-    """抽象类：设置项，仅是否启用的选项模版"""
+    """???:???,??????????"""
 
     def __init__(self, config, section: str, key: str, default_value: bool):
         super().__init__(config)
@@ -266,7 +305,7 @@ class _ModuleChildSettingSingleEnable(_ModuleChildSetting):
         self._default_value = default_value
 
     def read(self) -> bool:
-        """读取设置项"""
+        """?????"""
         value = self._read_key(self.section, self.key, self._default_value)
         if isinstance(value, bool):
             return value
@@ -275,15 +314,15 @@ class _ModuleChildSettingSingleEnable(_ModuleChildSetting):
         elif value == 'False':
             return False
         else:
-            raise ValueError(self.section, self.key, '无效的设置项值')
+            raise ValueError(self.section, self.key, '???????')
 
     def set(self, value: bool):
-        """设置设置项"""
+        """?????"""
         self._set_value(self.section, self.key, str(value))
 
 
 class _ModuleChildSettingSingleText(_ModuleChildSetting):
-    """抽象类：设置项，纯文本项的选项模版"""
+    """???:???,?????????"""
 
     def __init__(self, config, section: str, key: str, default_value: str):
         super().__init__(config)
@@ -292,16 +331,16 @@ class _ModuleChildSettingSingleText(_ModuleChildSetting):
         self._default_value = default_value
 
     def read(self) -> str:
-        """读取设置项"""
+        """?????"""
         return self._read_key(self.section, self.key, self._default_value)
 
     def set(self, value: str):
-        """设置设置项"""
+        """?????"""
         self._set_value(self.section, self.key, str(value))
 
 
 class _ChildSettingModelArchive(_ModuleChildSetting):
-    """设置项 压缩包处理模式"""
+    """??? ???????"""
 
     def __init__(self, config):
         super().__init__(config)
@@ -310,9 +349,9 @@ class _ChildSettingModelArchive(_ModuleChildSetting):
         self._default_value = ModelArchive.Test()
 
     def read(self) -> TYPES_MODEL_ARCHIVE:
-        """读取设置项"""
+        """?????"""
         value = self._read_key(self.section, self.key, self._default_value)
-        # 将读取的文本值转换为对应的自定义类
+        # ?????????????????
         if isinstance(value, (ModelArchive.Test, ModelArchive.Extract)):
             return value
         elif value == ModelArchive.Test.value:
@@ -320,34 +359,34 @@ class _ChildSettingModelArchive(_ModuleChildSetting):
         elif value == ModelArchive.Extract.value:
             return ModelArchive.Extract()
         else:
-            raise ValueError(self.section, self.key, '无效的设置项值')
+            raise ValueError(self.section, self.key, '???????')
 
     def set(self, value: TYPES_MODEL_ARCHIVE):
-        """设置设置项"""
+        """?????"""
         value_str = value.value
         self._set_value(self.section, self.key, value_str)
 
 
 class _ChildSettingModelPreFilter(_ModuleChildSetting):
-    """设置项 文件预筛选模式"""
+    """??? ???????"""
 
     def __init__(self, config):
         super().__init__(config)
         self.section = 'ModelPreFilter'
-        # 模式
+        # ??
         self.key_mode = 'model'
         self._default_value_mode = ModelPreFilter.Default()
-        # 黑名单规则（以双管道符间隔）
+        # ?????(???????)
         self.key_black_list = 'black_list'
         self._default_value_black_list = r'\.xls$||\.xlsx$||\.xlsm$||\.doc$||\.docx$||\.docm$||\.ppt$||\.pptx$||\.pptm$||\.csv$||\.odt$||\.ods$||\.odp$||\.epub$||\.kmz$||\.cbz$||\.ipa$||\.jar$||\.war$||\.ear$||\.aar$||\.xpi$||\.crx$||\.vsix$||\.nupkg$||\.whl$||\.apk$||\.exe$||\.appx$||\.msix$||\.aab$||\.xapk$||\.vpk$||\.pck$||\.ba2$||\.love$||\.mcpack$||\.mcworld$||\.bsa$||\.mpq$||\.sav$||\.dat$||\.pak$||\.quicksave$||\.autosave$'
-        # 　白名单规则（以双管道符间隔）
+        # ??????(???????)
         self.key_white_list = 'white_list'
         self._default_value_white_list = r'\.zip$||\.xz$||\.7z$||\.rar$||\.tar$||\.iso$||\.gz$||\.arj$||\.cramfs$||\.bzip2$||\.cab$||\.dmg$||\.wim$||\.gzip$||\.chm$||\.ext$||\.ar$||\.cpio$||\.\d+$||\.part\d+$||\.z\d+$'
 
     def read_mode(self) -> TYPES_MODEL_PRE_FILTER:
-        """读取设置项"""
+        """?????"""
         value = self._read_key(self.section, self.key_mode, self._default_value_mode)
-        # 将读取的文本值转换为对应的自定义类
+        # ?????????????????
         if isinstance(value, (ModelPreFilter.Default, ModelPreFilter.BlackList, ModelPreFilter.WhiteList)):
             return value
         elif value == ModelPreFilter.Default.value:
@@ -357,15 +396,15 @@ class _ChildSettingModelPreFilter(_ModuleChildSetting):
         elif value == ModelPreFilter.WhiteList.value:
             return ModelPreFilter.WhiteList()
         else:
-            raise ValueError(self.section, self.key_mode, '无效的设置项值')
+            raise ValueError(self.section, self.key_mode, '???????')
 
     def set_mode(self, value: TYPES_MODEL_PRE_FILTER):
-        """设置设置项"""
+        """?????"""
         value_str = value.value
         self._set_value(self.section, self.key_mode, value_str)
 
     def read_black_list(self) -> list[str]:
-        """读取设置项"""
+        """?????"""
         value = self._read_key(self.section, self.key_black_list, self._default_value_black_list)
         value = value.split('||')
         if value:
@@ -374,12 +413,12 @@ class _ChildSettingModelPreFilter(_ModuleChildSetting):
             return []
 
     def set_black_list(self, value: list[str]):
-        """设置设置项"""
+        """?????"""
         value_str = '||'.join(value)
         self._set_value(self.section, self.key_black_list, value_str)
 
     def read_white_list(self) -> list[str]:
-        """读取设置项"""
+        """?????"""
         value = self._read_key(self.section, self.key_white_list, self._default_value_white_list)
         value = value.split('||')
         if value:
@@ -388,66 +427,66 @@ class _ChildSettingModelPreFilter(_ModuleChildSetting):
             return []
 
     def set_white_list(self, value: list[str]):
-        """设置设置项"""
+        """?????"""
         value_str = '||'.join(value)
         self._set_value(self.section, self.key_white_list, value_str)
 
 
 class _ChildSettingTryUnknownFiletype(_ModuleChildSettingSingleEnable):
-    """设置项 是否处理未知格式"""
+    """??? ????????"""
 
     def __init__(self, config):
         super().__init__(config, section='TryUnknownFiletype', key='is_enable', default_value=False)
 
 
 class _ChildSettingReadPasswordFromFilename(_ModuleChildSettingSingleEnable):
-    """设置项 是否从文件名中读取密码"""
+    """??? ???????????"""
 
     def __init__(self, config):
         super().__init__(config, section='ReadPasswordFromFilename', key='is_enable', default_value=False)
 
 
 class _ChildSettingWriteFilename(_ModuleChildSetting):
-    """设置项 将密码写入文件名"""
+    """??? ????????"""
 
     def __init__(self, config):
         super().__init__(config)
         self.section = 'WriteFilename'
-        # 是否启用
+        # ????
         self.key_is_enable = 'is_enable'
         self._default_value_is_enable = False
-        # 密码文本格式 左侧字符
+        # ?????? ????
         self.key_left_word = 'left_word'
         self._default_value_left_word = ''
-        # 密码文本格式 右侧字符
+        # ?????? ????
         self.key_right_word = 'right_word'
         self._default_value_right_word = ''
-        # 密码文本格式 位置
+        # ?????? ??
         self.key_position = 'position'
         self._default_value_position = Position.Left()
 
     def get_preview(self) -> str:
-        """获取密码写入文件名的示例"""
+        """????????????"""
         left_part = self.read_left_word()
         right_part = self.read_right_word()
         position = self.read_position()
-        if isinstance(position, Position.Left) and not right_part:  # 防止密码与文件名之间没有间隔符号
+        if isinstance(position, Position.Left) and not right_part:  # ????????????????
             right_part = ' '
         elif isinstance(position, Position.Right) and not left_part:
             left_part = ' '
-        pw_part = f'{left_part}密码{right_part}'
-        filename_part = '原文件名'
+        pw_part = f'{left_part}??{right_part}'
+        filename_part = '????'
         if isinstance(position, Position.Left):
             preview = f'{pw_part}{filename_part}'
         elif isinstance(position, Position.Right):
             preview = f'{filename_part}{pw_part}'
         else:
-            preview = '错误的设置参数'
+            preview = '???????'
 
         return preview
 
     def read_is_enable(self) -> bool:
-        """读取设置项 是否启用"""
+        """????? ????"""
         value = self._read_key(self.section, self.key_is_enable, self._default_value_is_enable)
         if isinstance(value, bool):
             return value
@@ -456,30 +495,30 @@ class _ChildSettingWriteFilename(_ModuleChildSetting):
         elif value == 'False':
             return False
         else:
-            raise ValueError(self.section, self.key_is_enable, '无效的设置项值')
+            raise ValueError(self.section, self.key_is_enable, '???????')
 
     def set_is_enable(self, value: bool):
-        """设置设置项 是否启用"""
+        """????? ????"""
         self._set_value(self.section, self.key_is_enable, str(value))
 
     def read_left_word(self) -> str:
-        """读取设置项 密码左侧字符"""
+        """????? ??????"""
         return self._read_key(self.section, self.key_left_word, self._default_value_left_word)
 
     def set_left_word(self, value: str):
-        """设置设置项 密码左侧字符"""
+        """????? ??????"""
         self._set_value(self.section, self.key_left_word, str(value))
 
     def read_right_word(self) -> str:
-        """读取设置项 密码右侧字符"""
+        """????? ??????"""
         return self._read_key(self.section, self.key_right_word, self._default_value_right_word)
 
     def set_right_word(self, value: str):
-        """设置设置项 密码右侧字符"""
+        """????? ??????"""
         self._set_value(self.section, self.key_right_word, str(value))
 
     def read_position(self) -> TYPES_POSITION:
-        """读取设置项 密码位置"""
+        """????? ????"""
         value = self._read_key(self.section, self.key_position, self._default_value_position)
         if isinstance(value, (Position.Left, Position.Right)):
             return value
@@ -488,10 +527,10 @@ class _ChildSettingWriteFilename(_ModuleChildSetting):
         elif value == Position.Right.text:
             return Position.Right()
         else:
-            raise ValueError(self.section, self.key_position, '无效的设置项值')
+            raise ValueError(self.section, self.key_position, '???????')
 
     def set_position(self, value: TYPES_POSITION):
-        """设置设置项 密码位置"""
+        """????? ????"""
         if isinstance(value, (Position.Left, Position.Right)):
             value_str = value.text
         else:
@@ -500,7 +539,7 @@ class _ChildSettingWriteFilename(_ModuleChildSetting):
 
 
 class _ChildSettingModelExtract(_ModuleChildSetting):
-    """设置项 解压模式"""
+    """??? ????"""
 
     def __init__(self, config):
         super().__init__(config)
@@ -509,9 +548,9 @@ class _ChildSettingModelExtract(_ModuleChildSetting):
         self._default_value = ModelExtract.Smart()
 
     def read(self) -> TYPES_MODEL_EXTRACT:
-        """读取设置项"""
+        """?????"""
         value = self._read_key(self.section, self.key, self._default_value)
-        # 将读取的文本值转换为对应的自定义类
+        # ?????????????????
         if isinstance(value, (ModelExtract.Smart, ModelExtract.Direct, ModelExtract.SameFolder)):
             return value
         elif value == ModelExtract.Smart.value:
@@ -521,34 +560,69 @@ class _ChildSettingModelExtract(_ModuleChildSetting):
         elif value == ModelExtract.SameFolder.value:
             return ModelExtract.SameFolder()
         else:
-            raise ValueError(self.section, self.key, '无效的设置项值')
+            raise ValueError(self.section, self.key, '???????')
 
     def set(self, value: TYPES_MODEL_EXTRACT):
-        """设置设置项"""
+        """?????"""
         value_str = value.value
         self._set_value(self.section, self.key, value_str)
 
 
-class _ChildSettingDeleteFile(_ModuleChildSettingSingleEnable):
-    """设置项 是否删除原文件"""
+class _ChildSettingDeleteFile(_ModuleChildSetting):
+    """??? ????????????(v2.2.1:????????/????)"""
 
     def __init__(self, config):
-        super().__init__(config, section='DeleteFile', key='is_enable', default_value=False)
+        super().__init__(config)
+        self.section = 'DeleteFile'
+        # ????
+        self.key_is_enable = 'is_enable'
+        self._default_value_is_enable = False
+        # ????:trash(??????)/ direct(????)
+        self.key_delete_mode = 'delete_mode'
+        self._default_value_delete_mode = 'trash'
+
+    def read_is_enable(self) -> bool:
+        """????? ????"""
+        value = self._read_key(self.section, self.key_is_enable, self._default_value_is_enable)
+        if isinstance(value, bool):
+            return value
+        elif value == 'True':
+            return True
+        elif value == 'False':
+            return False
+        else:
+            raise ValueError(self.section, self.key_is_enable, '???????')
+
+    def set_is_enable(self, value: bool):
+        """????? ????"""
+        self._set_value(self.section, self.key_is_enable, str(value))
+
+    def read_delete_mode(self) -> str:
+        """????? ????"""
+        return self._read_key(self.section, self.key_delete_mode, self._default_value_delete_mode)
+
+    def set_delete_mode(self, value: str):
+        """????? ????"""
+        self._set_value(self.section, self.key_delete_mode, value)
+
+    def is_send_to_trash(self) -> bool:
+        """????????"""
+        return self.read_delete_mode() == 'trash'
 
 
 class _ChildSettingRecursiveExtract(_ModuleChildSettingSingleEnable):
-    """设置项 是否递归解压"""
+    """??? ??????"""
 
     def __init__(self, config):
         super().__init__(config, section='RecursiveExtract', key='is_enable', default_value=False)
 
     def set(self, value: bool):
-        """设置设置项"""
+        """?????"""
         self._set_value(self.section, self.key, str(value))
 
 
 class _ChildSettingModelCover(_ModuleChildSetting):
-    """设置项 覆盖模式"""
+    """??? ????"""
 
     def __init__(self, config):
         super().__init__(config)
@@ -557,9 +631,9 @@ class _ChildSettingModelCover(_ModuleChildSetting):
         self._default_value = ModelCoverFile.Overwrite()
 
     def read(self) -> TYPES_MODEL_COVER_FILE:
-        """读取设置项"""
+        """?????"""
         value = self._read_key(self.section, self.key, self._default_value)
-        # 将读取的文本值转换为对应的自定义类
+        # ?????????????????
         if isinstance(value, (ModelCoverFile.Overwrite, ModelCoverFile.Skip, ModelCoverFile.RenameNew,
                               ModelCoverFile.RenameOld)):
             return value
@@ -572,30 +646,30 @@ class _ChildSettingModelCover(_ModuleChildSetting):
         elif value == ModelCoverFile.RenameOld.text:
             return ModelCoverFile.RenameOld()
         else:
-            raise ValueError(self.section, self.key, '无效的设置项值')
+            raise ValueError(self.section, self.key, '???????')
 
     def set(self, value: TYPES_MODEL_COVER_FILE):
-        """设置设置项"""
+        """?????"""
         if not isinstance(value, str):
             value = value.value
         self._set_value(self.section, self.key, value)
 
 
 class _ChildSettingBreakFolder(_ModuleChildSetting):
-    """设置项 解散文件夹"""
+    """??? ?????"""
 
     def __init__(self, config):
         super().__init__(config)
         self.section = 'BreakFolder'
-        # 是否启用
+        # ????
         self.key_is_enable = 'is_enable'
         self._default_value_is_enable = False
-        # 解散模式
+        # ????
         self.key_model = 'model'
         self._default_value_model = ModelBreakFolder.MoveToTop()
 
     def read_is_enable(self) -> bool:
-        """读取设置项 是否启用"""
+        """????? ????"""
         value = self._read_key(self.section, self.key_is_enable, self._default_value_is_enable)
         if isinstance(value, bool):
             return value
@@ -604,16 +678,16 @@ class _ChildSettingBreakFolder(_ModuleChildSetting):
         elif value == 'False':
             return False
         else:
-            raise ValueError(self.section, self.key_is_enable, '无效的设置项值')
+            raise ValueError(self.section, self.key_is_enable, '???????')
 
     def set_is_enable(self, value: bool):
-        """设置设置项 是否启用"""
+        """????? ????"""
         self._set_value(self.section, self.key_is_enable, str(value))
 
     def read_model(self) -> TYPES_MODEL_BREAK_FOLDER:
-        """读取设置项 解散模式"""
+        """????? ????"""
         value = self._read_key(self.section, self.key_model, self._default_value_model)
-        # 将读取的文本值转换为对应的自定义类
+        # ?????????????????
         if isinstance(value, (ModelBreakFolder.MoveBottom, ModelBreakFolder.MoveToTop, ModelBreakFolder.MoveFiles)):
             return value
         elif value == ModelBreakFolder.MoveBottom.text:
@@ -623,31 +697,31 @@ class _ChildSettingBreakFolder(_ModuleChildSetting):
         elif value == ModelBreakFolder.MoveFiles.text:
             return ModelBreakFolder.MoveFiles()
         else:
-            raise ValueError(self.section, self.key_model, '无效的设置项值')
+            raise ValueError(self.section, self.key_model, '???????')
 
     def set_model(self,
                   value: TYPES_MODEL_BREAK_FOLDER):
-        """设置设置项 解散模式"""
+        """????? ????"""
         if not isinstance(value, str):
             value = value.value
         self._set_value(self.section, self.key_model, value)
 
 
 class _ChildSettingExtractOutputFolder(_ModuleChildSetting):
-    """设置项 解压输出目录"""
+    """??? ??????"""
 
     def __init__(self, config):
         super().__init__(config)
         self.section = 'ExtractOutputFolder'
-        # 是否启用
+        # ????
         self.key_is_enable = 'is_enable'
         self._default_value_is_enable = False
-        # 解散模式
+        # ????
         self.key_path = 'path'
         self._default_value_path = ''
 
     def read_is_enable(self) -> bool:
-        """读取设置项 是否启用"""
+        """????? ????"""
         value = self._read_key(self.section, self.key_is_enable, self._default_value_is_enable)
         if isinstance(value, bool):
             return value
@@ -656,36 +730,36 @@ class _ChildSettingExtractOutputFolder(_ModuleChildSetting):
         elif value == 'False':
             return False
         else:
-            raise ValueError(self.section, self.key_is_enable, '无效的设置项值')
+            raise ValueError(self.section, self.key_is_enable, '???????')
 
     def set_is_enable(self, value: bool):
-        """设置设置项 是否启用"""
+        """????? ????"""
         self._set_value(self.section, self.key_is_enable, str(value))
 
     def read_path(self) -> str:
-        """读取设置项 解压输出目录"""
+        """????? ??????"""
         return self._read_key(self.section, self.key_path, self._default_value_path)
 
     def set_path(self, value: str):
-        """设置设置项 解压输出目录"""
+        """????? ??????"""
         self._set_value(self.section, self.key_path, value)
 
 
 class _ChildSettingExtractFilter(_ModuleChildSetting):
-    """设置项 解压过滤器"""
+    """??? ?????"""
 
     def __init__(self, config):
         super().__init__(config)
         self.section = 'ExtractFilter'
-        # 是否启用
+        # ????
         self.key_is_enable = 'is_enable'
         self._default_value_is_enable = False
-        # 解散模式
+        # ????
         self.key_rules = 'rules'
-        self._default_value_rules = ''  # 直接存储switch（即包含-xr!的）
+        self._default_value_rules = ''  # ????switch(???-xr!?)
 
     def read_is_enable(self) -> bool:
-        """读取设置项 是否启用"""
+        """????? ????"""
         value = self._read_key(self.section, self.key_is_enable, self._default_value_is_enable)
         if isinstance(value, bool):
             return value
@@ -694,22 +768,22 @@ class _ChildSettingExtractFilter(_ModuleChildSetting):
         elif value == 'False':
             return False
         else:
-            raise ValueError(self.section, self.key_is_enable, '无效的设置项值')
+            raise ValueError(self.section, self.key_is_enable, '???????')
 
     def set_is_enable(self, value: bool):
-        """设置设置项 是否启用"""
+        """????? ????"""
         self._set_value(self.section, self.key_is_enable, str(value))
 
     def read_rules(self) -> list:
-        """读取设置项 过滤规则"""
-        # 读取文本选项，转为list
+        """????? ????"""
+        # ??????,??list
         setting = self._read_key(self.section, self.key_rules, self._default_value_rules)
         split = setting.split(_SPLIT_WORD)
         split = ['-xr!' + i for i in split if i]
         return split
 
     def read_rules_str(self) -> str:
-        """读取设置项 过滤规则"""
+        """????? ????"""
         setting = self._read_key(self.section, self.key_rules, self._default_value_rules)
         split = setting.split(_SPLIT_WORD)
         split = [i for i in split if i]
@@ -717,47 +791,56 @@ class _ChildSettingExtractFilter(_ModuleChildSetting):
         return text
 
     def set_rules(self, value: Union[str, list]):
-        """设置设置项 过滤规则"""
-        # 转换字符转为7zip switch格式
+        """????? ????(v2.2.1:??????,??html????*.html)"""
+        # ??????7zip switch??
         if isinstance(value, str):
             value = value.split('\n')
         value = [i for i in value if i]
-        value_join = _SPLIT_WORD.join(value)
+        # v2.2.1:??????,?????????(?html),????*.html
+        processed = []
+        for rule in value:
+            rule = rule.strip()
+            if rule and not rule.startswith('-xr!') and not rule.startswith('*') and '.' not in rule and not rule.startswith('\\'):
+                # ???,????*.??
+                processed.append(f'*.{rule}')
+            else:
+                processed.append(rule)
+        value_join = _SPLIT_WORD.join(processed)
         self._set_value(self.section, self.key_rules, value_join)
 
 
 class _ChildSetting7ZipPath(_ModuleChildSettingSingleText):
-    """设置项 7zip路径"""
+    """??? 7zip??"""
 
     def __init__(self, config):
         super().__init__(config, section='7ZipPath', key='filepath', default_value='')
 
 
 class _ChildSettingTopWindow(_ModuleChildSettingSingleEnable):
-    """设置项 置顶窗口"""
+    """??? ????"""
 
     def __init__(self, config):
         super().__init__(config, section='TopWindow', key='is_enable', default_value=False)
 
 
 class _ChildSettingLockSize(_ModuleChildSetting):
-    """设置项 锁定窗口尺寸"""
+    """??? ??????"""
 
     def __init__(self, config):
         super().__init__(config)
         self.section = 'LockSize'
-        # 是否启用
+        # ????
         self.key_is_enable = 'is_enable'
         self._default_value_is_enable = True
-        # 窗口高度
+        # ????
         self.key_height = 'height'
         self._default_value_height = 300
-        # 窗口宽度
+        # ????
         self.key_width = 'width'
         self._default_value_width = 300
 
     def read_is_enable(self) -> bool:
-        """读取设置项 是否启用"""
+        """????? ????"""
         value = self._read_key(self.section, self.key_is_enable, self._default_value_is_enable)
         if isinstance(value, bool):
             return value
@@ -766,26 +849,58 @@ class _ChildSettingLockSize(_ModuleChildSetting):
         elif value == 'False':
             return False
         else:
-            raise ValueError(self.section, self.key_is_enable, '无效的设置项值')
+            raise ValueError(self.section, self.key_is_enable, '???????')
 
     def set_is_enable(self, value: bool):
-        """设置设置项 是否启用"""
+        """????? ????"""
         self._set_value(self.section, self.key_is_enable, str(value))
 
     def read_height(self) -> int:
-        """读取设置项 窗口高度"""
+        """????? ????"""
         value = self._read_key(self.section, self.key_height, self._default_value_height)
         return int(value)
 
     def set_height(self, value: int):
-        """设置设置项窗口高度"""
+        """?????????"""
         self._set_value(self.section, self.key_height, str(value))
 
     def read_width(self) -> int:
-        """读取设置项 窗口宽度"""
+        """????? ????"""
         value = self._read_key(self.section, self.key_width, self._default_value_width)
         return int(value)
 
     def set_width(self, value: int):
-        """设置设置项 窗口宽度"""
+        """????? ????"""
         self._set_value(self.section, self.key_width, str(value))
+
+
+class _ChildSettingWebpToJpg(_ModuleChildSettingSingleEnable):
+    """??? v2.2.1:webp?????????jpg??"""
+
+    def __init__(self, config):
+        super().__init__(config, section='WebpToJpg', key='is_enable', default_value=True)
+
+
+class _ChildSettingWebpDeleteSource(_ModuleChildSettingSingleEnable):
+    """??? v2.2.1:webp??????????"""
+
+    def __init__(self, config):
+        super().__init__(config, section='WebpToJpg', key='delete_source', default_value=True)
+
+
+class _ChildSettingAreaOrder(_ModuleChildSetting):
+    """??? v2.2.1:????????"""
+
+    def __init__(self, config):
+        super().__init__(config)
+        self.section = 'AreaOrder'
+        self.key = 'order'
+        self._default_value = ''
+
+    def read(self) -> str:
+        """????? ????"""
+        return self._read_key(self.section, self.key, self._default_value)
+
+    def set(self, value: str):
+        """????? ????"""
+        self._set_value(self.section, self.key, value)
