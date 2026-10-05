@@ -1,5 +1,5 @@
-# ?????????
-# ????Viewer???,?????????Model????????,???Viewer??
+# 设置模块的桥梁组件
+# 用于接收Viewer的信号，并在选项修改时通过Model修改本地配置文件，并通知Viewer更新
 from PySide6.QtCore import QObject, Signal
 
 from common.class_7zip import ModelArchive, ModelExtract, TYPES_MODEL_ARCHIVE, ModelPreFilter
@@ -8,26 +8,26 @@ from components.page_setting.setting_viewer import SettingViewer
 
 
 class SettingPresenter(QObject):
-    """?????????"""
-    SignalTopWindow = Signal(bool, name='??????')
-    SignalLockSize = Signal(bool, name='????????')
-    SignalChangeArchiveModel = Signal(object, name='??????????')
+    """设置模块的桥梁组件"""
+    SignalTopWindow = Signal(bool, name='是否置顶窗口')
+    SignalLockSize = Signal(bool, name='是否锁定窗口大小')
+    SignalChangeArchiveModel = Signal(object, name='修改压缩文件处理模式')
 
     def __init__(self, viewer: SettingViewer, model: SettingModel):
         super().__init__()
         self.viewer = viewer
         self.model = model
 
-        # ???
-        self._load_setting()  # ?? ????????????????UI,????????????
+        # 初始化
+        self._load_setting()  # 注意 必须在绑定信号前加载初始设置更新UI，否则更新时会触发对应信号
         self._bind_signal()
 
     def get_archive_model(self):
-        """????????????? ??/??"""
+        """获取当前的压缩文件处理模式 解压/测试"""
         return self.model.get_model_archive()
 
     def get_extract_output_folder(self):
-        """????????,????????"""
+        """获取解压输出目录，若未启用则返回空"""
         is_enable = self.model.get_extract_output_folder_is_enable()
         path = self.model.get_extract_output_folder_path()
         if is_enable and path:
@@ -36,48 +36,48 @@ class SettingPresenter(QObject):
             return None
 
     def get_is_try_unknown_filetype(self):
-        """???????????????"""
+        """获取是否尝试处理未知格式的文件"""
         return self.model.get_try_unknown_filetype_is_enable()
 
     def update_filename_with_pw_preview(self):
-        """????????????"""
+        """更新密码写入文件名的预览"""
         self.viewer.set_setting_write_filename_preview(self.model.get_write_filename_preview())
 
     def lock_setting(self):
-        """?????,?????"""
+        """锁定设置项，禁止被修改"""
         self.viewer.lock()
 
     def unlock_setting(self):
-        """?????,?????"""
+        """解锁设置项，可以被修改"""
         self.viewer.unlock()
 
     def change_archive_model(self, archive_model: TYPES_MODEL_ARCHIVE):
-        """????????????"""
+        """手工修改压缩文件处理模式"""
         if isinstance(archive_model, ModelArchive.Test):
             self.viewer.set_setting_model_test()
         elif isinstance(archive_model, ModelArchive.Extract):
             self.viewer.set_setting_model_extract()
         else:
-            raise Exception(archive_model, "??????")
+            raise Exception(archive_model, "错误的设置项")
 
     def change_unknown_filetype(self, is_enable: bool):
-        """?????????????????"""
+        """手工修改是否尝试处理未知格式的文件"""
         self.viewer.set_setting_is_try_unknown_filetype(is_enable)
 
     def change_recursive_extract(self, is_enable: bool):
-        """??????????"""
+        """手工修改是否递归解压"""
         self.viewer.set_setting_recursive_extract(is_enable)
 
     def change_delete_file(self, is_enable: bool):
-        """??????????"""
+        """手工修改是否删除文件"""
         self.viewer.set_setting_delete_file(is_enable)
 
     def change_top_window(self, is_enable: bool):
-        """??????????"""
+        """手工修改是否置顶窗口"""
         self.viewer.set_top_window(is_enable)
 
     def _bind_signal(self):
-        """??Viewer??"""
+        """绑定Viewer信号"""
         self.viewer.ChangeArchiveModelTest.connect(self.model.set_model_archive_test)
         self.viewer.ChangeArchiveModelTest.connect(self.SignalChangeArchiveModel.emit)
         self.viewer.ChangeArchiveModelExtract.connect(self.model.set_model_archive_extract)
@@ -103,6 +103,8 @@ class SettingPresenter(QObject):
         self.viewer.ChangeDeleteMode.connect(self.model.set_delete_file_mode)
         self.viewer.ChangeWebpToJpg.connect(self.model.set_webp_to_jpg_is_enable)
         self.viewer.ChangeWebpDeleteSource.connect(self.model.set_webp_delete_source_is_enable)
+        self.viewer.ChangeTiffToJpg.connect(self.model.set_tiff_to_jpg_is_enable)
+        self.viewer.ChangeTiffDeleteSource.connect(self.model.set_tiff_delete_source_is_enable)
         self.viewer.ClickAdjustAreaOrder.connect(self._adjust_area_order)
         self.viewer.ChangeRecursiveExtract.connect(self.model.set_recursive_extract_is_enable)
         self.viewer.ChangeCoverModel.connect(self.model.set_model_cover)
@@ -119,14 +121,14 @@ class SettingPresenter(QObject):
         self.viewer.ChangeLockSize.connect(self.SignalLockSize.emit)
 
     def _load_setting(self):
-        """??????,??Viewer"""
+        """加载初始设置，更新Viewer"""
         archive_model = self.model.get_model_archive()
         if isinstance(archive_model, ModelArchive.Test):
             self.viewer.set_setting_model_test()
         elif isinstance(archive_model, ModelArchive.Extract):
             self.viewer.set_setting_model_extract()
         else:
-            raise Exception(archive_model, "??????")
+            raise Exception(archive_model, "错误的设置项")
 
         pre_filter_model = self.model.get_model_pre_filter()
         if isinstance(pre_filter_model, ModelPreFilter.Default):
@@ -136,7 +138,7 @@ class SettingPresenter(QObject):
         elif isinstance(pre_filter_model, ModelPreFilter.WhiteList):
             self.viewer.set_setting_pre_filter_mode_white_list()
         else:
-            raise Exception(pre_filter_model, "??????")
+            raise Exception(pre_filter_model, "错误的设置项")
 
         self.viewer.set_setting_pre_filter_mode_black_list_rule(
             self.model.get_model_pre_filter_blacklist_rule())
@@ -160,12 +162,14 @@ class SettingPresenter(QObject):
         elif isinstance(extract_model, ModelExtract.SameFolder):
             self.viewer.set_setting_extract_model_same_folder()
         else:
-            raise Exception(extract_model, "??????")
+            raise Exception(extract_model, "错误的设置项")
 
         self.viewer.set_setting_delete_file(self.model.get_delete_file_is_enable())
         self.viewer.set_setting_delete_mode(self.model.get_delete_file_mode())
         self.viewer.set_setting_webp_to_jpg(self.model.get_webp_to_jpg_is_enable())
         self.viewer.set_setting_webp_delete_source(self.model.get_webp_delete_source_is_enable())
+        self.viewer.set_setting_tiff_to_jpg(self.model.get_tiff_to_jpg_is_enable())
+        self.viewer.set_setting_tiff_delete_source(self.model.get_tiff_delete_source_is_enable())
 
         self.viewer.set_setting_recursive_extract(self.model.get_recursive_extract_is_enable())
 
@@ -188,18 +192,18 @@ class SettingPresenter(QObject):
         self.viewer.set_lock_size(self.model.get_lock_size_is_enable())
 
     def _adjust_area_order(self):
-        """v2.2.1:????????"""
+        """v2.2.1：调整设置区域顺序"""
         from PySide6.QtWidgets import QInputDialog, QMessageBox
-        areas = ['?????', '???', '????', '????', '????']
+        areas = ['压缩包处理', '预筛选', '密码处理', '解压设置', '其他设置']
         current_order = self.model.get_area_order()
         if current_order:
             current_list = current_order.split(',')
         else:
             current_list = areas
         text, ok = QInputDialog.getText(
-            None, '??????',
-            '??????(????):\n' + '\n'.join([f'{i+1}. {a}' for i, a in enumerate(current_list)]),
+            None, '调整区域顺序',
+            '输入区域顺序（逗号分隔）：\n' + '\n'.join([f'{i+1}. {a}' for i, a in enumerate(current_list)]),
             text=','.join(current_list))
         if ok and text:
             self.model.set_area_order(text.strip())
-            QMessageBox.information(None, '??', '???????,???????')
+            QMessageBox.information(None, '提示', '区域顺序已保存，重启软件后生效')
