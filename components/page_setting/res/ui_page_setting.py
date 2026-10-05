@@ -256,7 +256,7 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addWidget(self.checkBox_delete_origin)
 
-        # v2.2.1:???????
+        # v2.2.1：删除方式下拉框
         self.horizontalLayout_delete_mode = QHBoxLayout()
         self.horizontalLayout_delete_mode.setObjectName(u"horizontalLayout_delete_mode")
         self.label_delete_mode = QLabel(self.widget_extract)
@@ -278,17 +278,29 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addWidget(self.checkBox_recursive_extract)
 
-        # v2.2.1:webp?jpg
+        # v2.2.1：webp转jpg
         self.checkBox_webp_to_jpg = QCheckBox(self.widget_extract)
         self.checkBox_webp_to_jpg.setObjectName(u"checkBox_webp_to_jpg")
 
         self.verticalLayout_4.addWidget(self.checkBox_webp_to_jpg)
 
-        # v2.2.1:webp????????
+        # v2.2.1：webp转换后删除源文件
         self.checkBox_webp_delete_source = QCheckBox(self.widget_extract)
         self.checkBox_webp_delete_source.setObjectName(u"checkBox_webp_delete_source")
 
         self.verticalLayout_4.addWidget(self.checkBox_webp_delete_source)
+
+        # v2.2.1：tiff图片解压后自动转换jpg
+        self.checkBox_tiff_to_jpg = QCheckBox(self.widget_extract)
+        self.checkBox_tiff_to_jpg.setObjectName(u"checkBox_tiff_to_jpg")
+
+        self.verticalLayout_4.addWidget(self.checkBox_tiff_to_jpg)
+
+        # v2.2.1：tiff转换后删除源文件
+        self.checkBox_tiff_delete_source = QCheckBox(self.widget_extract)
+        self.checkBox_tiff_delete_source.setObjectName(u"checkBox_tiff_delete_source")
+
+        self.verticalLayout_4.addWidget(self.checkBox_tiff_delete_source)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -366,7 +378,7 @@ class Ui_Form(object):
 
         self.verticalLayout_4.addWidget(self.plainTextEdit_extract_filter_rule)
 
-        # v2.2.1:????????
+        # v2.2.1：智能后缀识别说明
         self.label_suffix_hint = QLabel(self.widget_extract)
         self.label_suffix_hint.setObjectName(u"label_suffix_hint")
         self.label_suffix_hint.setWordWrap(True)
@@ -424,7 +436,7 @@ class Ui_Form(object):
 
         self.verticalLayout_6.addWidget(self.scrollArea)
 
-        # v2.2.1:????????
+        # v2.2.1：调整区域顺序按钮
         self.pushButton_adjust_area_order = QPushButton(self.page)
         self.pushButton_adjust_area_order.setObjectName(u"pushButton_adjust_area_order")
 
@@ -574,6 +586,8 @@ class Ui_Form(object):
         self.checkBox_recursive_extract.setText(QCoreApplication.translate("Form", u"\u9012\u5f52\u89e3\u538b\u5d4c\u5957\u538b\u7f29\u5305", None))
         self.checkBox_webp_to_jpg.setText(QCoreApplication.translate("Form", u"\u89e3\u538b\u540ewebp\u56fe\u7247\u81ea\u52a8\u8f6c\u6362\u4e3ajpg", None))
         self.checkBox_webp_delete_source.setText(QCoreApplication.translate("Form", u"webp\u8f6c\u6362\u540e\u5220\u9664\u6e90\u6587\u4ef6", None))
+        self.checkBox_tiff_to_jpg.setText(QCoreApplication.translate("Form", u"\u89e3\u538b\u540etiff\u56fe\u7247\u81ea\u52a8\u8f6c\u6362\u4e3ajpg", None))
+        self.checkBox_tiff_delete_source.setText(QCoreApplication.translate("Form", u"tiff\u8f6c\u6362\u540e\u5220\u9664\u6e90\u6587\u4ef6", None))
         self.label.setText(QCoreApplication.translate("Form", u"\u8986\u76d6\u6a21\u5f0f", None))
         self.comboBox_cover_file.setItemText(0, QCoreApplication.translate("Form", u"\u8986\u76d6\u91cd\u590d\u6587\u4ef6", None))
         self.comboBox_cover_file.setItemText(1, QCoreApplication.translate("Form", u"\u8df3\u8fc7\u91cd\u590d\u6587\u4ef6", None))
