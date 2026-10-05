@@ -1,4 +1,4 @@
-import os
+﻿import os
 import time
 
 import lzytools
@@ -48,6 +48,83 @@ def _convert_webp_to_jpg_in_folder(folder_path: str, delete_source: bool = True)
                     print(f'webp转jpg失败: {webp_path}, 错误: {e}')
     if converted_count > 0:
         print(f'webp转jpg完成，共转换 {converted_count} 个文件')
+
+
+def _convert_tiff_to_jpg_in_folder(folder_path: str, delete_source: bool = True):
+    """v2.2.1：递归将文件夹中的tiff/tif图片转换为jpg格式
+    :param folder_path: 要处理的文件夹路径
+    :param delete_source: 转换后是否删除源tiff文件"""
+    try:
+        from PIL import Image
+    except ImportError:
+        print('Pillow未安装，跳过tiff转jpg')
+        return
+
+    converted_count = 0
+    for root, dirs, files in os.walk(folder_path):
+        for filename in files:
+            if filename.lower().endswith(('.tiff', '.tif')):
+                tiff_path = os.path.join(root, filename)
+                jpg_path = os.path.splitext(tiff_path)[0] + '.jpg'
+                try:
+                    img = Image.open(tiff_path)
+                    # 处理RGBA模式（tiff可能带透明通道）
+                    if img.mode in ('RGBA', 'P', 'I;16', 'I;16L', 'I;16B', 'F'):
+                        background = Image.new('RGB', img.size, (255, 255, 255))
+                        if img.mode in ('P', 'I;16', 'I;16L', 'I;16B', 'F'):
+                            img = img.convert('RGBA')
+                        background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                        img = background
+                    else:
+                        img = img.convert('RGB')
+                    img.save(jpg_path, 'JPEG', quality=95)
+                    img.close()
+                    if delete_source:
+                        lzytools.file.delete(tiff_path, send_to_trash=False)
+                    converted_count += 1
+                except Exception as e:
+                    print(f'tiff转jpg失败: {tiff_path}, 错误: {e}')
+    if converted_count > 0:
+        print(f'tiff转jpg完成，共转换 {converted_count} 个文件')
+
+
+def _convert_tiff_to_jpg_in_folder(folder_path: str, delete_source: bool = True):
+    """v2.2.2：递归将文件夹中的tiff图片转换为jpg格式
+    :param folder_path: 要处理的文件夹路径
+    :param delete_source: 转换后是否删除源tiff文件"""
+    try:
+        from PIL import Image
+    except ImportError:
+        print('Pillow未安装，跳过tiff转jpg')
+        return
+
+    converted_count = 0
+    for root, dirs, files in os.walk(folder_path):
+        for filename in files:
+            if filename.lower().endswith(('.tiff', '.tif')):
+                tiff_path = os.path.join(root, filename)
+                jpg_path = os.path.splitext(tiff_path)[0] + '.jpg'
+                try:
+                    img = Image.open(tiff_path)
+                    # 处理RGBA模式（tiff可能带透明通道）
+                    if img.mode in ('RGBA', 'P', 'I;16', 'I;16B', 'F'):
+                        background = Image.new('RGB', img.size, (255, 255, 255))
+                        if img.mode in ('P', 'I;16', 'I;16B', 'F'):
+                            img = img.convert('RGBA')
+                        background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                        img = background
+                    else:
+                        img = img.convert('RGB')
+                    img.save(jpg_path, 'JPEG', quality=95)
+                    img.close()
+                    # v2.2.2：根据设置决定是否删除原tiff文件
+                    if delete_source:
+                        lzytools.file.delete(tiff_path, send_to_trash=False)
+                    converted_count += 1
+                except Exception as e:
+                    print(f'tiff转jpg失败: {tiff_path}, 错误: {e}')
+    if converted_count > 0:
+        print(f'tiff转jpg完成，共转换 {converted_count} 个文件')
 
 
 class TemplateThread(QThread):
@@ -281,6 +358,8 @@ class ThreadExtract(TemplateThread):
         self.delete_mode: str = 'trash'  # v2.2.1：删除方式（trash/direct）
         self.is_webp_to_jpg: bool = True  # v2.2.1：解压后webp转jpg
         self.webp_delete_source: bool = True  # v2.2.1：webp转换后删除源文件
+        self.is_tiff_to_jpg: bool = True  # v2.2.1：解压后tiff转jpg
+        self.tiff_delete_source: bool = True  # v2.2.1：tiff转换后删除源文件
         self.last_temp_folder = ''  # 上一个任务的临时文件夹，用于判断是否删除临时文件夹
 
         # 解压后参数
@@ -546,6 +625,10 @@ class ThreadExtract(TemplateThread):
             if self.is_webp_to_jpg and extract_path and os.path.exists(extract_path):
                 self.StepInfo.emit('解压完成，webp图片转换jpg中...')
                 _convert_webp_to_jpg_in_folder(extract_path, delete_source=self.webp_delete_source)
+            # v2.2.1：tiff图片自动转jpg
+            if self.is_tiff_to_jpg and extract_path and os.path.exists(extract_path):
+                self.StepInfo.emit('解压完成，tiff图片转换jpg中...')
+                _convert_tiff_to_jpg_in_folder(extract_path, delete_source=self.tiff_delete_source)
             # 是否删除原文件（删除同组中的全部文件，v2.2.1：根据删除方式选择回收站/直接删除）
             file_info = self.fileinfo_task.get_file_info(file)
             related_files = file_info.related_files
