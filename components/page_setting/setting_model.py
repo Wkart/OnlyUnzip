@@ -41,6 +41,8 @@ class SettingModel:
         self._lock_size = _ChildSettingLockSize(self.config)
         self._webp_to_jpg = _ChildSettingWebpToJpg(self.config)
         self._webp_delete_source = _ChildSettingWebpDeleteSource(self.config)
+        self._tiff_to_jpg = _ChildSettingTiffToJpg(self.config)
+        self._tiff_delete_source = _ChildSettingTiffDeleteSource(self.config)
         self._area_order = _ChildSettingAreaOrder(self.config)
 
     @staticmethod
@@ -266,6 +268,22 @@ class SettingModel:
     def set_webp_delete_source_is_enable(self, is_enable: bool):
         """v2.2.1：设置webp转换后是否删除源文件"""
         self._webp_delete_source.set(is_enable)
+
+    def get_tiff_to_jpg_is_enable(self):
+        """v2.2.1：获取tiff转jpg是否启用"""
+        return self._tiff_to_jpg.read()
+
+    def set_tiff_to_jpg_is_enable(self, is_enable: bool):
+        """v2.2.1：设置tiff转jpg是否启用"""
+        self._tiff_to_jpg.set(is_enable)
+
+    def get_tiff_delete_source_is_enable(self):
+        """v2.2.1：获取tiff转换后是否删除源文件"""
+        return self._tiff_delete_source.read()
+
+    def set_tiff_delete_source_is_enable(self, is_enable: bool):
+        """v2.2.1：设置tiff转换后是否删除源文件"""
+        self._tiff_delete_source.set(is_enable)
 
     def get_area_order(self):
         """v2.2.1：获取设置区域顺序"""
@@ -890,6 +908,20 @@ class _ChildSettingWebpDeleteSource(_ModuleChildSettingSingleEnable):
 
     def __init__(self, config):
         super().__init__(config, section='WebpToJpg', key='delete_source', default_value=True)
+
+
+class _ChildSettingTiffToJpg(_ModuleChildSettingSingleEnable):
+    """设置项 v2.2.1：tiff图片解压后自动转换jpg格式"""
+
+    def __init__(self, config):
+        super().__init__(config, section='TiffToJpg', key='is_enable', default_value=True)
+
+
+class _ChildSettingTiffDeleteSource(_ModuleChildSettingSingleEnable):
+    """设置项 v2.2.1：tiff转换后是否删除源文件"""
+
+    def __init__(self, config):
+        super().__init__(config, section='TiffToJpg', key='delete_source', default_value=True)
 
 
 class _ChildSettingAreaOrder(_ModuleChildSetting):
